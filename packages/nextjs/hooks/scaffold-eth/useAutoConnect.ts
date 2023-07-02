@@ -37,7 +37,7 @@ const getInitialConnector = (
       }
 
       const connector = connectors.find(f => f.id === previousWalletId);
-      return { connector };
+      return { connector};
     }
   }
 
@@ -49,25 +49,34 @@ const getInitialConnector = (
  */
 export const useAutoConnect = (): void => {
   const [walletId, setWalletId] = useLocalStorage<string>(walletIdStorageKey, "");
+  const [localStorageAccountConnected, setLocalStorageAccountConnected] =  useLocalStorage<boolean>("wagmi.connected", false);
   const connectState = useConnect();
   const accountState = useAccount();
 
   useEffect(() => {
+
+    const disconnectedByUser = accountState.isDisconnected && localStorageAccountConnected;
+    
     if (accountState.isConnected) {
       // user is connected, set walletName
       setWalletId(accountState.connector?.id ?? "");
-    } else {
+    } else if(disconnectedByUser){
       // user has disconnected, reset walletName
       setWalletId("");
+      
     }
+   
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountState.isConnected, accountState.connector?.name]);
+  }, [accountState.isConnected, accountState.connector?.name,localStorageAccountConnected]);
+  
 
-  useEffectOnce(() => {
+  useEffect(()=>{
+  
     const initialConnector = getInitialConnector(walletId, connectState.connectors);
 
-    if (initialConnector?.connector) {
+    if (initialConnector?.connector && localStorageAccountConnected===true) {
       connectState.connect({ connector: initialConnector.connector, chainId: initialConnector.chainId });
     }
-  });
+
+  },[walletId,localStorageAccountConnected])
 };
