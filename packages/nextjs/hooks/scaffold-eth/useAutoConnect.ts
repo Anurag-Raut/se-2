@@ -37,7 +37,7 @@ const getInitialConnector = (
       }
 
       const connector = connectors.find(f => f.id === previousWalletId);
-      return { connector};
+      return { connector };
     }
   }
 
@@ -74,7 +74,7 @@ export const useAutoConnect = (): void => {
   
     const initialConnector = getInitialConnector(walletId, connectState.connectors);
 
-    if (initialConnector?.connector && localStorageAccountConnected===true) {
+    if (initialConnector?.connector && localStorageAccountConnected) {
       connectState.connect({ connector: initialConnector.connector, chainId: initialConnector.chainId });
     }
 
